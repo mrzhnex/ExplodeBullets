@@ -24,6 +24,11 @@ namespace ExplodeBullets
             }
         }
 
+        internal void OnRoundStart()
+        {
+            Global.FemurBreaker = GameObject.FindWithTag("FemurBreaker");
+        }
+
         private string GetUsage()
         {
             return "eb <id>/<nickname> <add>/<remove>";
@@ -95,8 +100,12 @@ namespace ExplodeBullets
             Grenade grenade = Object.Instantiate(gameObject.GetComponent<GrenadeManager>().availableGrenades.FirstOrDefault().grenadeInstance).GetComponent<Grenade>();
             grenade.gameObject.transform.position = position;
             NetworkServer.Spawn(grenade.gameObject);
-            gameObject.AddComponent<HurtDelayComponent>();
-            gameObject.GetComponents<HurtDelayComponent>().Last().Position = position;
+            
+            if (Global.FemurBreaker != null)
+            {
+                Global.FemurBreaker.AddComponent<HurtDelayComponent>();
+                Global.FemurBreaker.GetComponents<HurtDelayComponent>().Last().Position = position;
+            }
         }
     }
 }

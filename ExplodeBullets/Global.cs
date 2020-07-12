@@ -1,7 +1,10 @@
-﻿namespace ExplodeBullets
+﻿using UnityEngine;
+
+namespace ExplodeBullets
 {
-    class Global
+    public static class Global
     {
+        public static GameObject FemurBreaker;
         public static float save_distance = 7f;
     }
 }

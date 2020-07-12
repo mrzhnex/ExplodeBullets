@@ -12,6 +12,7 @@ namespace ExplodeBullets
             Events.ShootEvent += SetEvent.OnShoot;
             Events.PlayerSpawnEvent += SetEvent.OnPlayerSpawn;
             Events.RemoteAdminCommandEvent += SetEvent.OnRemoteAdminCommand;
+            Events.RoundStartEvent += SetEvent.OnRoundStart;
             Log.Info(getName + " on");
         }
 
@@ -20,6 +21,7 @@ namespace ExplodeBullets
             Events.ShootEvent -= SetEvent.OnShoot;
             Events.PlayerSpawnEvent -= SetEvent.OnPlayerSpawn;
             Events.RemoteAdminCommandEvent -= SetEvent.OnRemoteAdminCommand;
+            Events.RoundStartEvent -= SetEvent.OnRoundStart;
             Log.Info(getName + " off");
         }
 
