@@ -16,9 +16,9 @@ namespace ExplodeBullets
                 GameObject gameobj = ev.Shooter.gameObject;
                 if (Physics.Raycast(gameobj.transform.position, gameobj.GetComponent<Scp049PlayerScript>().plyCam.transform.forward, out RaycastHit hit, 800f))
                 {
-                    if (hit.distance > Global.save_distance)
+                    if (hit.distance > Global.SaveDistance)
                     {
-                        CustomThrowG(hit.point, gameobj);
+                        CustomThrowG(hit.point, ev.Shooter);
                     }
                 }
             }
@@ -91,20 +91,21 @@ namespace ExplodeBullets
             }
         }
 
-        public void CustomThrowG(Vector3 position, GameObject gameObject)
+        public void CustomThrowG(Vector3 position, ReferenceHub player)
         {
-            if (gameObject.GetComponent<GrenadeManager>().availableGrenades.FirstOrDefault() == default)
+            if (player.gameObject.GetComponent<GrenadeManager>().availableGrenades.FirstOrDefault() == default)
             {
                 return;
             }
-            Grenade grenade = Object.Instantiate(gameObject.GetComponent<GrenadeManager>().availableGrenades.FirstOrDefault().grenadeInstance).GetComponent<Grenade>();
+            Grenade grenade = Object.Instantiate(player.gameObject.GetComponent<GrenadeManager>().availableGrenades.FirstOrDefault().grenadeInstance).GetComponent<Grenade>();
             grenade.gameObject.transform.position = position;
             NetworkServer.Spawn(grenade.gameObject);
             
             if (Global.FemurBreaker != null)
             {
-                Global.FemurBreaker.AddComponent<HurtDelayComponent>();
-                Global.FemurBreaker.GetComponents<HurtDelayComponent>().Last().Position = position;
+                HurtDelayComponent hurtDelayComponent = Global.FemurBreaker.AddComponent<HurtDelayComponent>();
+                hurtDelayComponent.Position = position;
+                hurtDelayComponent.ReferenceHub = player;
             }
         }
     }

@@ -7,6 +7,7 @@ namespace ExplodeBullets
     {
         private float Timer = 0.0f;
         public Vector3 Position;
+        public ReferenceHub ReferenceHub;
 
         public void Update()
         {
@@ -20,9 +21,9 @@ namespace ExplodeBullets
                     {
                         continue;
                     }
-                    if (Vector3.Distance(referenceHub.GetPosition(), Position) < 7.0f)
+                    if (Vector3.Distance(referenceHub.GetPosition(), Position) < Global.HurtDistance)
                     {
-                        referenceHub.playerStats.HurtPlayer(new PlayerStats.HitInfo(GetDamage(Vector3.Distance(referenceHub.GetPosition(), Position)), Player.GetPlayer(gameObject).nicknameSync.Network_myNickSync, DamageTypes.Grenade, Player.GetPlayer(gameObject).GetPlayerId()), referenceHub.gameObject);
+                        referenceHub.playerStats.HurtPlayer(new PlayerStats.HitInfo(GetDamage(Vector3.Distance(referenceHub.GetPosition(), Position)), ReferenceHub.nicknameSync.Network_myNickSync, DamageTypes.Grenade, ReferenceHub.GetPlayerId()), referenceHub.gameObject);
                     }
                 }
                 foreach (Door door in Map.Doors)
@@ -35,7 +36,7 @@ namespace ExplodeBullets
                     {
                         continue;
                     }
-                    if (Vector3.Distance(Position, door.gameObject.transform.position) > 7.0f)
+                    if (Vector3.Distance(Position, door.gameObject.transform.position) > Global.HurtDistance)
                     {
                         continue;
                     }
@@ -47,7 +48,7 @@ namespace ExplodeBullets
 
         private float GetDamage(float distance)
         {
-            return (7.0f - distance) * 25 + Random.Range(0, 10);
+            return (Global.HurtDistance - distance) * 25 + Random.Range(0, 10);
         }
     }
 }
