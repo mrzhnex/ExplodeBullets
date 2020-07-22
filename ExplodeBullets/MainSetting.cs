@@ -4,8 +4,8 @@ namespace ExplodeBullets
 {
     public class MainSetting : Plugin
     {
-        public override string getName => "ExplodeBullets";
-        private SetEvent SetEvent;
+        public override string getName => nameof(ExplodeBullets);
+        public SetEvent SetEvent { get; set; }
         public override void OnEnable()
         {
             SetEvent = new SetEvent();

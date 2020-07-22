@@ -41,6 +41,7 @@ namespace ExplodeBullets
             {
                 return;
             }
+            ev.Allow = false;
             if (args.Length != 3)
             {
                 ev.Sender.RAMessage("Out of args. Usage: " + GetUsage());
