@@ -1,5 +1,5 @@
-﻿using EXILED;
-using EXILED.Extensions;
+﻿using Exiled.API.Features;
+using Exiled.Events.EventArgs;
 using Grenades;
 using Mirror;
 using System.Linq;
@@ -9,12 +9,74 @@ namespace ExplodeBullets
 {
     public class SetEvent
     {
-        public void OnShoot(ref ShootEvent ev)
+        internal void OnRoundStarted()
         {
-            if (ev.Shooter.inventory.curItem == ItemType.GunE11SR && ev.Shooter.gameObject.GetComponent<ExplodeMaster>())
+            Global.FemurBreaker = GameObject.FindWithTag("FemurBreaker");
+        }
+
+        internal void OnSendingRemoteAdminCommand(SendingRemoteAdminCommandEventArgs ev)
+        {
+            if (ev.Name != "eb")
             {
-                GameObject gameobj = ev.Shooter.gameObject;
-                if (Physics.Raycast(gameobj.transform.position, gameobj.GetComponent<Scp049PlayerScript>().plyCam.transform.forward, out RaycastHit hit, 800f))
+                return;
+            }
+            ev.IsAllowed = false;
+            if (ev.Arguments.Count != 2)
+            {
+                ev.Sender.RemoteAdminMessage("Out of args. Usage: " + GetUsage());
+                return;
+            }
+
+            Player player = Player.Get(ev.Arguments[0]);
+            if (player == null)
+            {
+                ev.Sender.RemoteAdminMessage("Player not found", false);
+                return;
+            }
+            switch (ev.Arguments[1])
+            {
+                case "add":
+                    if (player.GameObject.GetComponent<ExplodeMaster>() == null)
+                    {
+                        player.GameObject.AddComponent<ExplodeMaster>();
+                        ev.Sender.RemoteAdminMessage("Add ExplodeMaster to " + player.Nickname);
+                    }
+                    else
+                    {
+                        ev.Sender.RemoteAdminMessage("Is already ExplodeMaster " + player.Nickname);
+                    }
+                    return;
+                case "remove":
+                    if (player.GameObject.GetComponent<ExplodeMaster>() == null)
+                    {
+                        ev.Sender.RemoteAdminMessage("Is not ExplodeMaster " + player.Nickname);
+                    }
+                    else
+                    {
+                        Object.Destroy(player.GameObject.GetComponent<ExplodeMaster>());
+                        ev.Sender.RemoteAdminMessage("Remove ExplodeMaster from" + player.Nickname);
+                    }
+                    return;
+                default:
+                    ev.Sender.RemoteAdminMessage("Out of args. Usage: " + GetUsage());
+                    return;
+            }
+        }
+
+        internal void OnChangingRole(ChangingRoleEventArgs ev)
+        {
+            if (ev.Player.GameObject.GetComponent<ExplodeMaster>())
+            {
+                Object.Destroy(ev.Player.GameObject.GetComponent<ExplodeMaster>());
+            }
+        }
+
+        internal void OnShot(ShotEventArgs ev)
+        {
+            if (ev.Shooter.Inventory.curItem == ItemType.GunE11SR && ev.Shooter.GameObject.GetComponent<ExplodeMaster>())
+            {
+                GameObject gameobj = ev.Shooter.GameObject;
+                if (Physics.Raycast(gameobj.transform.position, ev.Shooter.PlayerCamera.forward, out RaycastHit hit, 800f))
                 {
                     if (hit.distance > Global.SaveDistance)
                     {
@@ -24,81 +86,18 @@ namespace ExplodeBullets
             }
         }
 
-        internal void OnRoundStart()
-        {
-            Global.FemurBreaker = GameObject.FindWithTag("FemurBreaker");
-        }
-
         private string GetUsage()
         {
             return "eb <id>/<nickname> <add>/<remove>";
         }
 
-        public void OnRemoteAdminCommand(ref RACommandEvent ev)
+        public void CustomThrowG(Vector3 position, Player player)
         {
-            string[] args = ev.Command.Split(' ');
-            if (args.Length > 0 && args[0] != "eb")
+            if (player.GameObject.GetComponent<GrenadeManager>().availableGrenades.FirstOrDefault() == default)
             {
                 return;
             }
-            ev.Allow = false;
-            if (args.Length != 3)
-            {
-                ev.Sender.RAMessage("Out of args. Usage: " + GetUsage());
-                return;
-            }
-
-            ReferenceHub playerHub = Player.GetPlayer(args[1]);
-            if (playerHub == null)
-            {
-                ev.Sender.RAMessage("Player not found", false);
-                return;
-            }
-            switch (args[2])
-            {
-                case "add":
-                    if (playerHub.gameObject.GetComponent<ExplodeMaster>() == null)
-                    {
-                        playerHub.gameObject.AddComponent<ExplodeMaster>();
-                        ev.Sender.RAMessage("Add ExplodeMaster to " + playerHub.nicknameSync.Network_myNickSync);
-                        return;
-                    }
-                    else
-                    {
-                        ev.Sender.RAMessage("Is already ExplodeMaster " + playerHub.nicknameSync.Network_myNickSync);
-                        return;
-                    }
-                case "remove":
-                    if (playerHub.gameObject.GetComponent<ExplodeMaster>() == null)
-                    {
-                        ev.Sender.RAMessage("Is not ExplodeMaster " + playerHub.nicknameSync.Network_myNickSync);
-                        return;
-                    }
-                    else
-                    {
-                        Object.Destroy(playerHub.gameObject.GetComponent<ExplodeMaster>());
-                        ev.Sender.RAMessage("Remove ExplodeMaster from" + playerHub.nicknameSync.Network_myNickSync);
-                        return;
-                    }
-            }
-
-        }
-
-        public void OnPlayerSpawn(PlayerSpawnEvent ev)
-        {
-            if (ev.Player.gameObject.GetComponent<ExplodeMaster>())
-            {
-                Object.Destroy(ev.Player.gameObject.GetComponent<ExplodeMaster>());
-            }
-        }
-
-        public void CustomThrowG(Vector3 position, ReferenceHub player)
-        {
-            if (player.gameObject.GetComponent<GrenadeManager>().availableGrenades.FirstOrDefault() == default)
-            {
-                return;
-            }
-            Grenade grenade = Object.Instantiate(player.gameObject.GetComponent<GrenadeManager>().availableGrenades.FirstOrDefault().grenadeInstance).GetComponent<Grenade>();
+            Grenade grenade = Object.Instantiate(player.GameObject.GetComponent<GrenadeManager>().availableGrenades.FirstOrDefault().grenadeInstance).GetComponent<Grenade>();
             grenade.gameObject.transform.position = position;
             NetworkServer.Spawn(grenade.gameObject);
             
@@ -106,7 +105,7 @@ namespace ExplodeBullets
             {
                 HurtDelayComponent hurtDelayComponent = Global.FemurBreaker.AddComponent<HurtDelayComponent>();
                 hurtDelayComponent.Position = position;
-                hurtDelayComponent.ReferenceHub = player;
+                hurtDelayComponent.Player = player;
             }
         }
     }

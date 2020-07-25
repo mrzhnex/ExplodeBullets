@@ -1,4 +1,4 @@
-﻿using EXILED.Extensions;
+﻿using Exiled.API.Features;
 using UnityEngine;
 
 namespace ExplodeBullets
@@ -7,7 +7,7 @@ namespace ExplodeBullets
     {
         private float Timer = 0.0f;
         public Vector3 Position;
-        public ReferenceHub ReferenceHub;
+        public Player Player;
 
         public void Update()
         {
@@ -15,15 +15,15 @@ namespace ExplodeBullets
 
             if (Timer > 0.1f)
             {
-                foreach (ReferenceHub referenceHub in Player.GetHubs())
+                foreach (Player player in Player.List)
                 {
-                    if (referenceHub.GetRole() == RoleType.Spectator || referenceHub.GetRole() == RoleType.Scp079)
+                    if (player.Role == RoleType.Spectator || player.Role == RoleType.Scp079)
                     {
                         continue;
                     }
-                    if (Vector3.Distance(referenceHub.GetPosition(), Position) < Global.HurtDistance)
+                    if (Vector3.Distance(player.Position, Position) < Global.HurtDistance)
                     {
-                        referenceHub.playerStats.HurtPlayer(new PlayerStats.HitInfo(GetDamage(Vector3.Distance(referenceHub.GetPosition(), Position)), ReferenceHub.nicknameSync.Network_myNickSync, DamageTypes.Grenade, ReferenceHub.GetPlayerId()), referenceHub.gameObject);
+                        player.ReferenceHub.playerStats.HurtPlayer(new PlayerStats.HitInfo(GetDamage(Vector3.Distance(player.Position, Position)), Player.Nickname, DamageTypes.Grenade, Player.Id), player.GameObject);
                     }
                 }
                 foreach (Door door in Map.Doors)

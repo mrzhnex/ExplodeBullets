@@ -1,30 +1,28 @@
-﻿using EXILED;
+﻿using Exiled.API.Features;
 
 namespace ExplodeBullets
 {
-    public class MainSetting : Plugin
+    public class MainSetting : Plugin<Config>
     {
-        public override string getName => nameof(ExplodeBullets);
+        public override string Name => nameof(ExplodeBullets);
         public SetEvent SetEvent { get; set; }
-        public override void OnEnable()
+        public override void OnEnabled()
         {
             SetEvent = new SetEvent();
-            Events.ShootEvent += SetEvent.OnShoot;
-            Events.PlayerSpawnEvent += SetEvent.OnPlayerSpawn;
-            Events.RemoteAdminCommandEvent += SetEvent.OnRemoteAdminCommand;
-            Events.RoundStartEvent += SetEvent.OnRoundStart;
-            Log.Info(getName + " on");
+            Exiled.Events.Handlers.Player.Shot += SetEvent.OnShot;
+            Exiled.Events.Handlers.Player.ChangingRole += SetEvent.OnChangingRole;
+            Exiled.Events.Handlers.Server.SendingRemoteAdminCommand += SetEvent.OnSendingRemoteAdminCommand;
+            Exiled.Events.Handlers.Server.RoundStarted += SetEvent.OnRoundStarted;
+            Log.Info(Name + " on");
         }
 
-        public override void OnDisable()
+        public override void OnDisabled()
         {
-            Events.ShootEvent -= SetEvent.OnShoot;
-            Events.PlayerSpawnEvent -= SetEvent.OnPlayerSpawn;
-            Events.RemoteAdminCommandEvent -= SetEvent.OnRemoteAdminCommand;
-            Events.RoundStartEvent -= SetEvent.OnRoundStart;
-            Log.Info(getName + " off");
+            Exiled.Events.Handlers.Player.Shot -= SetEvent.OnShot;
+            Exiled.Events.Handlers.Player.ChangingRole -= SetEvent.OnChangingRole;
+            Exiled.Events.Handlers.Server.SendingRemoteAdminCommand -= SetEvent.OnSendingRemoteAdminCommand;
+            Exiled.Events.Handlers.Server.RoundStarted -= SetEvent.OnRoundStarted;
+            Log.Info(Name + " off");
         }
-
-        public override void OnReload() { }
     }
 }
