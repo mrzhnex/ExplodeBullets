@@ -63,15 +63,7 @@ namespace ExplodeBullets
             }
         }
 
-        internal void OnChangingRole(ChangingRoleEventArgs ev)
-        {
-            if (ev.Player.GameObject.GetComponent<ExplodeMaster>())
-            {
-                Object.Destroy(ev.Player.GameObject.GetComponent<ExplodeMaster>());
-            }
-        }
-
-        internal void OnShot(ShotEventArgs ev)
+        internal void OnShooting(ShootingEventArgs ev)
         {
             if (ev.Shooter.Inventory.curItem == ItemType.GunE11SR && ev.Shooter.GameObject.GetComponent<ExplodeMaster>())
             {
@@ -83,6 +75,14 @@ namespace ExplodeBullets
                         CustomThrowG(hit.point, ev.Shooter);
                     }
                 }
+            }
+        }
+
+        internal void OnChangingRole(ChangingRoleEventArgs ev)
+        {
+            if (ev.Player.GameObject.GetComponent<ExplodeMaster>())
+            {
+                Object.Destroy(ev.Player.GameObject.GetComponent<ExplodeMaster>());
             }
         }
 
